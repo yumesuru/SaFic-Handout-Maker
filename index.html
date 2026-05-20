@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Insane Handout Maker</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="editor-panel" aria-label="핸드아웃 편집">
+        <div class="brand-block">
+          <p class="eyebrow">멀티 호러 TRPG 인세인</p>
+          <h1>Handout Maker</h1>
+        </div>
+
+        <div class="control-group">
+          <label>핸드아웃 종류</label>
+          <div class="segmented" role="radiogroup" aria-label="핸드아웃 종류">
+            <input type="radio" id="typePublic" name="handoutType" value="public" checked>
+            <label for="typePublic">공개</label>
+            <input type="radio" id="typeSecret" name="handoutType" value="secret">
+            <label for="typeSecret">비밀</label>
+            <input type="radio" id="typeMadness" name="handoutType" value="madness">
+            <label for="typeMadness">광기</label>
+            <input type="radio" id="typeRitual" name="handoutType" value="ritual">
+            <label for="typeRitual">의식</label>
+          </div>
+        </div>
+
+        <div class="symbol-toolbar" aria-label="기호 입력">
+          <button type="button" data-insert="「」">「」</button>
+          <button type="button" data-insert="【】">【】</button>
+          <button id="clearInputsButton" type="button">전체 지우기</button>
+        </div>
+
+        <div class="field-grid">
+          <label id="titleField">
+            <span>핸드아웃 이름</span>
+            <input id="titleInput" type="text" value="핸드아웃 이름 입력" maxlength="48">
+          </label>
+          <label id="metaField">
+            <span id="metaLabel">보조 정보</span>
+            <textarea id="metaInput" rows="2" maxlength="80">대상자 입력</textarea>
+          </label>
+        </div>
+
+        <section id="ritualFields" class="ritual-fields" aria-label="의식 단계 입력" hidden>
+          <div class="ritual-header">
+            <span>단계</span>
+            <span>절차명</span>
+            <span>지정 특기</span>
+            <span>참가 조건</span>
+            <span>페널티</span>
+          </div>
+          <div id="ritualRows"></div>
+        </section>
+
+        <label class="stacked-field">
+          <span>본문</span>
+          <textarea id="bodyInput" rows="8">내용 입력</textarea>
+        </label>
+
+        <div class="button-row">
+          <button id="copyHtmlButton" type="button">HTML 복사</button>
+          <button id="savePngButton" type="button">PNG 저장</button>
+        </div>
+        <p id="statusMessage" class="status-message" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="preview-panel" aria-label="핸드아웃 미리보기">
+        <div id="handoutPreview"></div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
