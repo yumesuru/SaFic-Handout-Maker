@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>사이코로 픽션 공식풍 핸드아웃 메이커</title>
-    <link rel="stylesheet" href="styles.css?v=20261003-4">
+    <link rel="stylesheet" href="styles.css?v=20261003-local-39">
   </head>
   <body>
     <main id="homePage" class="home-page">
@@ -18,16 +18,13 @@
     </main>
     <main id="editorPage" class="app-shell" hidden>
       <section class="editor-panel" aria-label="핸드아웃 편집">
-        <a class="back-link" href="#">← 룰 선택</a><div class="brand-block">
-          <p class="eyebrow">멀티 호러 TRPG 인세인</p>
-          <h1>Handout Maker</h1>
-        </div>
+        <a class="back-link" href="#">← 룰 선택</a>
 
-        <div class="control-group">
+        <div id="insaneControls" class="control-group">
           <label>핸드아웃 종류</label>
           <div class="segmented" role="radiogroup" aria-label="핸드아웃 종류">
             <input type="radio" id="typePublic" name="handoutType" value="public" checked>
-            <label for="typePublic">공개</label>
+            <label for="typePublic">기본</label>
             <input type="radio" id="typeSecret" name="handoutType" value="secret">
             <label for="typeSecret">비밀</label>
             <input type="radio" id="typeMadness" name="handoutType" value="madness">
@@ -37,6 +34,14 @@
           </div>
         </div>
 
+<div id="stratoControls" hidden><div class="control-group"><label>핸드아웃 종류</label><div class="segmented two-tabs" role="radiogroup" aria-label="스트라토 샤우트 양식"><input type="radio" id="stratoCard" name="stratoTab" value="card" checked><label for="stratoCard">굴레</label><input type="radio" id="stratoLyrics" name="stratoTab" value="lyrics"><label for="stratoLyrics">가사 시트</label></div></div><div id="stratoSideControls" class="control-group"><label>카드 면</label><div class="segmented two-tabs" role="radiogroup" aria-label="굴레 카드 면"><input id="stratoFront" type="radio" name="stratoSide" value="public" checked><label for="stratoFront">앞면</label><input id="stratoBack" type="radio" name="stratoSide" value="secret"><label for="stratoBack">뒷면</label></div></div></div><div id="magicaControls" hidden>
+          <div class="control-group"><label>핸드아웃 종류</label><div class="segmented two-tabs" role="radiogroup" aria-label="마기카로기아 핸드아웃 종류"><input type="radio" id="magicaBasic" checked name="magicaTab" value="basic"><label for="magicaBasic">기본</label><input type="radio" id="magicaFragment" name="magicaTab" value="fragment"><label for="magicaFragment">단장</label></div></div>
+          <div class="control-group"><label>공개 여부</label><div class="segmented two-tabs" role="radiogroup" aria-label="마기카로기아 공개 여부"><input type="radio" id="magicaPublic" name="magicaVisibility" value="public" checked><label for="magicaPublic">공개</label><input type="radio" id="magicaSecret" name="magicaVisibility" value="secret"><label for="magicaSecret">비밀</label></div></div>
+        </div>
+<div id="shinobiControls" hidden><div class="control-group"><label>핸드아웃 종류</label><div class="segmented three-tabs" role="radiogroup" aria-label="시노비가미 핸드아웃 종류"><input type="radio" id="shinobiTabbasic" name="shinobiTab" value="basic" checked><label for="shinobiTabbasic">기본</label>
+<input type="radio" id="shinobiTabenigma" name="shinobiTab" value="enigma" ><label for="shinobiTabenigma">에니그마</label>
+<input type="radio" id="shinobiTabpersona" name="shinobiTab" value="persona" ><label for="shinobiTabpersona">페르소나</label></div></div><div class="control-group"><label>공개 여부</label><div class="segmented two-tabs" role="radiogroup" aria-label="공개 여부"><input type="radio" id="shinobiVisibilitypublic" name="shinobiVisibility" value="public" checked><label for="shinobiVisibilitypublic">공개</label>
+<input type="radio" id="shinobiVisibilitysecret" name="shinobiVisibility" value="secret" ><label for="shinobiVisibilitysecret">비밀</label></div></div></div><p id="layoutPending" hidden>이 탭의 핸드아웃 양식은 준비 중입니다.</p>
         <div class="symbol-toolbar" aria-label="기호 입력">
           <button type="button" data-insert="「」">「」</button>
           <button type="button" data-insert="【】">【】</button><button type="button" data-insert="《》">《》</button>
@@ -46,11 +51,11 @@
         <div class="field-grid">
           <label id="titleField">
             <span>핸드아웃 이름</span>
-            <input id="titleInput" type="text" value="핸드아웃 이름 입력" maxlength="48">
+            <input id="titleInput" type="text" maxlength="48">
           </label>
           <label id="metaField">
             <span id="metaLabel">보조 정보</span>
-            <textarea id="metaInput" rows="2" maxlength="80">대상자 입력</textarea>
+            <textarea id="metaInput" rows="2" maxlength="80"></textarea>
           </label>
         </div>
 
@@ -67,9 +72,21 @@
 
         <label class="stacked-field">
           <span>본문</span>
-          <textarea id="bodyInput" rows="8">내용 입력</textarea>
+          <textarea id="bodyInput" rows="8"></textarea>
         </label>
 
+        <section id="enigmaFields" hidden aria-label="에니그마 전력 입력">
+          <label class="stacked-field"><span>해제 조건</span><textarea id="enigmaConditionInput" rows="4"></textarea></label>
+          <label class="stacked-field"><span>효과</span><textarea id="enigmaEffectInput" rows="4"></textarea></label>
+        </section>
+        <section id="fragmentFields" class="fragment-fields" aria-label="단장 정보 입력" hidden><div class="fragment-input-row" style="grid-template-columns:repeat(1, minmax(0,1fr));"><label><span>단장</span><input data-fragment="name" type="text"></label></div>
+<div class="fragment-input-row" style="grid-template-columns:repeat(1, minmax(0,1fr));"><label><span>초기 빙의 심도</span><input data-fragment="depth" type="text"></label></div>
+<div class="fragment-input-row" style="grid-template-columns:repeat(3, minmax(0,1fr));"><label><span>공격력</span><input data-fragment="attack" type="text"></label><label><span>방어력</span><input data-fragment="defense" type="text"></label><label><span>근원력</span><input data-fragment="source" type="text"></label></div>
+<div class="fragment-input-row" style="grid-template-columns:repeat(1, minmax(0,1fr));"><label><span>마력</span><input data-fragment="mana" type="text"></label></div>
+<div class="fragment-input-row" style="grid-template-columns:repeat(1, minmax(0,1fr));"><label><span>마법</span><textarea data-fragment="magic" rows="2"></textarea></label></div>
+<div class="fragment-input-row" style="grid-template-columns:repeat(2, minmax(0,1fr));"><label><span>영역</span><input data-fragment="domain" type="text"></label><label><span>특기</span><input data-fragment="skill" type="text"></label></div></section>
+<section id="stratoFrontFields" hidden aria-label="굴레 앞면 입력"><label class="stacked-field"><span>넘버</span><input data-strato="number" type="text"></label><label class="stacked-field"><span>이름</span><input data-strato="name" type="text"></label><label class="stacked-field"><span>지정특기</span><input data-strato="skill" type="text"></label><label class="stacked-field"><span>지정특기 추가</span><input data-strato="skillExtra" type="text"></label></section><section id="stratoBackFields" hidden aria-label="굴레 뒷면 입력"><label class="stacked-field"><span>정체</span><textarea data-strato="identity" rows="3"></textarea></label><label class="stacked-field"><span>지배력 · 공개 시</span><input data-strato="publicPower" type="text"></label><label class="stacked-field"><span>지배력 · 비공개 시</span><input data-strato="secretPower" type="text"></label><label class="stacked-field"><span>효과</span><textarea data-strato="effect" rows="3"></textarea></label></section>
+<section id="lyricsFields" hidden aria-label="가사 시트 입력"><label class="stacked-field"><span>곡명</span><input data-lyrics="title" type="text" value="곡명"></label><label class="stacked-field"><span>노래</span><input data-lyrics="author" type="text"></label><div class="control-group"><label>A 파트 / 제 1 라운드</label><label class="stacked-field"><span>왼쪽 가사</span><textarea data-lyrics="ALeft" rows="6"></textarea></label><label class="stacked-field"><span>오른쪽 가사</span><textarea data-lyrics="ARight" rows="6"></textarea></label></div><div class="control-group"><label>B 파트 / 제 2 라운드</label><label class="stacked-field"><span>왼쪽 가사</span><textarea data-lyrics="BLeft" rows="6"></textarea></label><label class="stacked-field"><span>오른쪽 가사</span><textarea data-lyrics="BRight" rows="6"></textarea></label></div><div class="control-group"><label>C 파트 / 제 3 라운드</label><label class="stacked-field"><span>왼쪽 가사</span><textarea data-lyrics="CLeft" rows="6"></textarea></label><label class="stacked-field"><span>오른쪽 가사</span><textarea data-lyrics="CRight" rows="6"></textarea></label></div></section>
         <div class="button-row">
           <button id="copyHtmlButton" type="button">HTML 복사</button>
           <button id="savePngButton" type="button">PNG 저장</button>
@@ -91,6 +108,6 @@
       <p>본 사이트는 온라인 세션용 핸드아웃을 보다 손쉽게 만들기 위해, AI를 사용하여 구현했습니다.</p>
       <p>제작한 HTML/PNG의 가공은 자유입니다. <a href="https://github.com/yumesuru/SaFic-Handout-Maker" target="_blank" rel="noopener noreferrer">코드 기여하기</a> / <a href="https://forms.gle/oBZGMsxUxvCJ1FZ38" target="_blank" rel="noopener noreferrer">문의하기</a>를 이용해주세요.</p>
     </footer>
-    <script src="app.js?v=20261003-4" defer></script><script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js" defer></script>
+    <script src="app.js?v=20261003-local-39" defer></script><script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js" defer></script>
   </body>
 </html>
