@@ -1,3 +1,23 @@
+const RULE_NAMES = {
+  insane: "인세인",
+  shinobigami: "시노비가미",
+  magicalogica: "마기카로기아",
+  stratoshout: "스트라토 샤우트"
+};
+
+function showPage() {
+  const rule = window.location.hash.slice(1);
+  const isHome = !Object.prototype.hasOwnProperty.call(RULE_NAMES, rule);
+  document.querySelector("#homePage").hidden = !isHome;
+  document.querySelector("#editorPage").hidden = rule !== "insane";
+  document.querySelector("#pendingPage").hidden = isHome || rule === "insane";
+  document.querySelector("#pendingRuleTitle").textContent = RULE_NAMES[rule] || "";
+  document.title = isHome ? "사이코로 픽션 공식풍 핸드아웃 메이커" : `${RULE_NAMES[rule]} 핸드아웃 메이커`;
+}
+
+window.addEventListener("hashchange", showPage);
+showPage();
+
 const TYPE_CONFIG = {
   public: { fileName: "insane-public-handout.png" },
   secret: { fileName: "insane-secret-handout.png" },
@@ -265,23 +285,3 @@ function setStatus(message) {
 }
 
 updatePreview();
-
-const RULE_NAMES = {
-  insane: "인세인",
-  shinobigami: "시노비가미",
-  magicalogica: "마기카로기아",
-  stratoshout: "스트라토 샤우트"
-};
-
-function showPage() {
-  const rule = window.location.hash.slice(1);
-  const isHome = !Object.hasOwn(RULE_NAMES, rule);
-  document.querySelector("#homePage").hidden = !isHome;
-  document.querySelector("#editorPage").hidden = rule !== "insane";
-  document.querySelector("#pendingPage").hidden = isHome || rule === "insane";
-  document.querySelector("#pendingRuleTitle").textContent = RULE_NAMES[rule] || "";
-  document.title = isHome ? "사이코로 픽션 공식풍 핸드아웃 메이커" : `${RULE_NAMES[rule]} 핸드아웃 메이커`;
-}
-
-window.addEventListener("hashchange", showPage);
-showPage();
