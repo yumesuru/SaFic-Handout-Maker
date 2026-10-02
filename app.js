@@ -85,7 +85,7 @@ function triggerHtml(text) {
 }
 
 function publicHtml(data) {
-  return `<div style="width:300px; height:420px; box-sizing:border-box; background:#fff; font-family:Arial, 'Noto Sans KR', sans-serif; color:#111; padding-top:10px;"><div style="text-align:center; font-size:24px; line-height:1.2; margin-bottom:6px;">Handout</div><div style="width:278px; height:364px; margin:0 auto; border:2px solid #111; box-sizing:border-box; padding:3px;"><div style="width:100%; height:100%; border:1px solid #666; box-sizing:border-box;"><div style="display:flex; height:38px; border-bottom:1px solid #111; box-sizing:border-box;"><div style="width:53px; border-right:1px solid #777; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">이름</div><div style="flex:1; display:flex; align-items:center; padding-left:11px; font-size:16px; box-sizing:border-box;">${escapeHtml(data.title)}</div></div><div style="height:31px; border-bottom:1px solid #111; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">사명</div><div style="padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div></div></div></div>`;
+  return `<div style="width:300px; height:420px; box-sizing:border-box; border:1px solid #111; background:#fff; font-family:Arial, 'Noto Sans KR', sans-serif; color:#111; padding-top:10px;"><div style="text-align:center; font-size:24px; line-height:1.2; margin-bottom:6px;">Handout</div><div style="width:278px; height:364px; margin:0 auto; border:2px solid #111; box-sizing:border-box; padding:3px;"><div style="width:100%; height:100%; border:1px solid #666; box-sizing:border-box;"><div style="display:flex; height:38px; border-bottom:1px solid #111; box-sizing:border-box;"><div style="width:53px; border-right:1px solid #777; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">이름</div><div style="flex:1; display:flex; align-items:center; padding-left:11px; font-size:16px; box-sizing:border-box;">${escapeHtml(data.title)}</div></div><div style="height:31px; border-bottom:1px solid #111; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">사명</div><div style="padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div></div></div></div>`;
 }
 
 function secretHtml(data) {
@@ -265,3 +265,23 @@ function setStatus(message) {
 }
 
 updatePreview();
+
+const RULE_NAMES = {
+  insane: "인세인",
+  shinobigami: "시노비가미",
+  magicalogica: "마기카로기아",
+  stratoshout: "스트라토 샤우트"
+};
+
+function showPage() {
+  const rule = window.location.hash.slice(1);
+  const isHome = !Object.hasOwn(RULE_NAMES, rule);
+  document.querySelector("#homePage").hidden = !isHome;
+  document.querySelector("#editorPage").hidden = rule !== "insane";
+  document.querySelector("#pendingPage").hidden = isHome || rule === "insane";
+  document.querySelector("#pendingRuleTitle").textContent = RULE_NAMES[rule] || "";
+  document.title = isHome ? "사이코로 픽션 공식풍 핸드아웃 메이커" : `${RULE_NAMES[rule]} 핸드아웃 메이커`;
+}
+
+window.addEventListener("hashchange", showPage);
+showPage();
