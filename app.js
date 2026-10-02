@@ -5,8 +5,7 @@ const RULE_NAMES = {
   stratoshout: "스트라토 샤우트"
 };
 
-function isEditorRule(rule) { return rule === "insane" || rule === "shinobigami" || rule === "magicalogica" || rule === "stratoshout"; }
-function isLyrics() { return isStrato() && document.querySelector('input[name="stratoTab"]:checked').value === "lyrics"; }
+function isLyrics() { return isStrato() && selectedValue("stratoTab") === "lyrics"; }
 function isStrato() { return window.location.hash === "#stratoshout"; }
 function isMagica() { return window.location.hash === "#magicalogica"; }
 function isShinobi() { return window.location.hash === "#shinobigami"; }
@@ -15,14 +14,9 @@ function showPage() {
   const rule = window.location.hash.slice(1);
   const isHome = !Object.prototype.hasOwnProperty.call(RULE_NAMES, rule);
   document.querySelector("#homePage").hidden = !isHome;
-  document.querySelector("#editorPage").hidden = !isEditorRule(rule);
-  document.querySelector("#pendingPage").hidden = isHome || isEditorRule(rule);
-  document.querySelector("#pendingRuleTitle").textContent = RULE_NAMES[rule] || "";
+  document.querySelector("#editorPage").hidden = isHome;
   document.title = isHome ? "사이코로 픽션 공식풍 핸드아웃 메이커" : `${RULE_NAMES[rule]} 핸드아웃 메이커`;
 }
-
-window.addEventListener("hashchange", showPage);
-showPage();
 
 const TYPE_CONFIG = {
   public: { fileName: "insane-public-handout.png" },
@@ -34,7 +28,6 @@ const TYPE_CONFIG = {
 const RITUAL_STEPS = 6;
 
 const fields = {
-  typeRadios: document.querySelectorAll('input[name="handoutType"]'),
   titleField: document.querySelector("#titleField"),
   title: document.querySelector("#titleInput"),
   metaField: document.querySelector("#metaField"),
@@ -65,9 +58,17 @@ function buildRitualInputs() {
   fields.ritualRows.innerHTML = rows.join("");
 }
 
+function selectedValue(name) {
+  return document.querySelector(`input[name="${name}"]:checked`).value;
+}
+
+function readInputGroup(key) {
+  return Object.fromEntries(Array.from(document.querySelectorAll(`[data-${key}]`), input => [input.dataset[key], input.value.trim()]));
+}
+
 function getType() {
   const group = isStrato() ? "stratoSide" : isMagica() ? "magicaVisibility" : isShinobi() ? "shinobiVisibility" : "handoutType";
-  return document.querySelector(`input[name="${group}"]:checked`).value;
+  return selectedValue(group);
 }
 
 function values() {
@@ -77,9 +78,9 @@ function values() {
     body: fields.body.value.trim(),
     condition: fields.enigmaCondition.value.trim(),
     effect: fields.enigmaEffect.value.trim(),
-    lyrics: Object.fromEntries(Array.from(document.querySelectorAll("[data-lyrics]"), input => [input.dataset.lyrics, input.value.trim()])),
-    strato: Object.fromEntries(Array.from(document.querySelectorAll("[data-strato]"), input => [input.dataset.strato, input.value.trim()])),
-    fragment: Object.fromEntries(Array.from(document.querySelectorAll("[data-fragment]"), input => [input.dataset.fragment, input.value.trim()])),
+    lyrics: readInputGroup("lyrics"),
+    strato: readInputGroup("strato"),
+    fragment: readInputGroup("fragment"),
     ritualRows: getRitualRows()
   };
 }
@@ -130,14 +131,13 @@ function madnessHtml(data) {
   return `<div style="width:300px; height:420px; overflow:hidden; box-sizing:border-box; background:#000; font-family:Arial, 'Noto Sans KR', sans-serif; color:#fff; padding-top:10px;"><div style="text-align:center; font-size:24px; font-weight:500; line-height:1.2; margin-bottom:8px;">Handout</div><div style="width:280px; height:364px; margin:0 auto; border:3px solid #fff; box-sizing:border-box; padding:3px;"><div style="width:100%; height:100%; box-sizing:border-box; position:relative;"><div style="background:#fff; color:#000;"><div style="display:flex; height:32px; border-bottom:1px solid #000; box-sizing:border-box;"><div style="width:60px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">광기</div><div style="flex:1; display:flex; align-items:center; padding-left:11px; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">${escapeHtml(data.title)}</div></div><div style="display:flex; height:33px; border-bottom:1px solid #000; box-sizing:border-box;"><div style="width:60px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">트리거</div><div data-trigger style="flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; padding-left:11px; font-size:16px; line-height:1; overflow-wrap:anywhere; box-sizing:border-box;"><div data-trigger-text style="flex-shrink:0; width:100%;">${triggerHtml(data.meta)}</div></div></div><div style="height:264px; color:#000; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div></div><div style="position:absolute; left:0; right:0; bottom:0; height:34px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; box-sizing:border-box; transform:translateY(6px);">이 광기를 스스로 밝힐 수는 없다.</div></div></div></div>`;
 }
 
-function ritualCellHtml(text, extraStyle = "") {
-  return `<div style="border-right:1px solid #000; display:flex; align-items:center; justify-content:center; padding:0 6px; box-sizing:border-box; font-size:14px; line-height:1.2; overflow-wrap:anywhere; ${extraStyle}">${escapeHtml(text)}</div>`;
+function ritualCellHtml(text) {
+  return `<div style="border-right:1px solid #000; display:flex; align-items:center; justify-content:center; padding:0 6px; box-sizing:border-box; font-size:14px; line-height:1.2; overflow-wrap:anywhere;">${escapeHtml(text)}</div>`;
 }
 
 function ritualRowHtml(row, hasBottomBorder) {
   const border = hasBottomBorder ? " border-bottom:1px solid #000;" : "";
-  const skill = row.skill;
-  return `<div style="display:grid; grid-template-columns:70px 125px 97px 185px 1fr; height:40px;${border} box-sizing:border-box; font-size:16px;">${ritualCellHtml(row.step)}${ritualCellHtml(row.name)}${ritualCellHtml(skill)}${ritualCellHtml(row.condition)}<div style="display:flex; align-items:center; justify-content:center; padding:0 6px; box-sizing:border-box; font-size:14px; line-height:1.2; overflow-wrap:anywhere;">${escapeHtml(row.penalty)}</div></div>`;
+  return `<div style="display:grid; grid-template-columns:70px 125px 97px 185px 1fr; height:40px;${border} box-sizing:border-box; font-size:16px;">${ritualCellHtml(row.step)}${ritualCellHtml(row.name)}${ritualCellHtml(row.skill)}${ritualCellHtml(row.condition)}<div style="display:flex; align-items:center; justify-content:center; padding:0 6px; box-sizing:border-box; font-size:14px; line-height:1.2; overflow-wrap:anywhere;">${escapeHtml(row.penalty)}</div></div>`;
 }
 
 function ritualHtml(data) {
@@ -188,7 +188,7 @@ function magicaHtml(type, data) {
   const background = secret ? "#000" : "#fff";
   const foreground = secret ? "#fff" : "#111";
   const nameRow = secret ? "" : `<div style="display:flex; height:38px; flex-shrink:0; border-bottom:1px solid #111; box-sizing:border-box;"><div style="width:53px; flex-shrink:0; border-right:1px solid #111; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">이름</div><div style="flex:1; min-width:0; display:flex; align-items:center; padding-left:11px; font-size:16px; line-height:1; box-sizing:border-box;">${escapeHtml(data.title)}</div></div>`;
-  const fragment = document.querySelector('input[name="magicaTab"]:checked').value === "fragment";
+  const fragment = selectedValue("magicaTab") === "fragment";
   const body = secret && fragment
     ? `<div style="flex:1; min-height:0; display:grid; grid-template-rows:repeat(2,minmax(0,1fr)); background:#fff; color:#111; box-sizing:border-box;"><div style="padding:10px; font-size:16px; line-height:1.5; overflow-wrap:anywhere; box-sizing:border-box;">${escapeHtml(data.body)}</div><div style="border-top:1px solid #111; background:#c5c5c5; min-height:0; box-sizing:border-box;">${fragmentInfoHtml(data)}</div></div>`
     : `<div style="flex:1; min-height:0; overflow:hidden; background:#fff; color:#111; padding:10px; box-sizing:border-box; font-size:16px; line-height:1.5; overflow-wrap:anywhere;">${escapeHtml(data.body)}</div>`;
@@ -215,7 +215,7 @@ function handoutHtml(type, data) {
   if (isStrato()) return stratoHtml(type, data);
   if (isMagica()) return magicaHtml(type, data);
   if (isShinobi()) {
-    const tab = document.querySelector('input[name="shinobiTab"]:checked').value;
+    const tab = selectedValue("shinobiTab");
     if (tab === "enigma" && type === "secret") return enigmaSecretHtml(data);
     if (tab === "persona" && type === "secret") return personaSecretHtml(data);
     if (type === "public" && (tab === "enigma" || tab === "persona")) {
@@ -241,25 +241,12 @@ function updatePreview() {
   document.querySelector("#stratoControls").hidden = !strato;
   document.querySelector("#stratoFrontFields").hidden = !strato || lyrics || type !== "public";
   document.querySelector("#stratoBackFields").hidden = !strato || lyrics || type !== "secret";
-  document.querySelector("#fragmentFields").hidden = !(magica && type === "secret" && document.querySelector('input[name="magicaTab"]:checked').value === "fragment");
-  const tab = shinobi ? document.querySelector('input[name="shinobiTab"]:checked').value : "basic";
-  const pending = false;
+  document.querySelector("#fragmentFields").hidden = !(magica && type === "secret" && selectedValue("magicaTab") === "fragment");
+  const tab = shinobi ? selectedValue("shinobiTab") : "basic";
   document.querySelector("#insaneControls").hidden = shinobi || magica || strato;
   document.querySelector("#magicaControls").hidden = !magica;
   document.querySelector("#shinobiControls").hidden = !shinobi;
-  document.querySelector("#layoutPending").hidden = !pending;
-  fields.copyButton.disabled = pending;
-  fields.saveButton.disabled = pending;
-  fields.clearButton.disabled = pending;
-  document.querySelector(".symbol-toolbar").hidden = pending;
-  document.querySelector(".field-grid").hidden = pending;
-  if (pending) {
-    fields.bodyField.hidden = true;
-    fields.ritualFields.hidden = true;
-    fields.preview.innerHTML = "";
-    return;
-  }
-  fields.titleField.hidden = strato || (magica && type === "secret") || type === "secret" && !(shinobi && (tab === "persona" || tab === "enigma"));
+  fields.titleField.hidden = strato || (type === "secret" && !(shinobi && (tab === "persona" || tab === "enigma")));
   fields.metaField.hidden = strato || magica || shinobi || type === "public" || type === "ritual";
   const enigmaSecret = shinobi && tab === "enigma" && type === "secret";
   fields.enigmaFields.hidden = !enigmaSecret;
@@ -316,8 +303,9 @@ async function copyHtml() {
 }
 
 function insertSymbol(pair) {
-  const visibleFallback = isLyrics() ? document.querySelector('[data-lyrics="title"]') : isStrato() && getType() === "public" ? document.querySelector('[data-strato="name"]') : fields.body;
-  const target = lastFocusedTextField && !lastFocusedTextField.closest("[hidden]") ? lastFocusedTextField : (!fields.enigmaFields.hidden ? fields.enigmaCondition : visibleFallback);
+  const visible = visibleTextFields();
+  const target = visible.includes(lastFocusedTextField) ? lastFocusedTextField : visible[0];
+  if (!target) return;
   const start = target.selectionStart ?? target.value.length;
   const end = target.selectionEnd ?? target.value.length;
   const selected = target.value.slice(start, end);
@@ -331,52 +319,26 @@ function insertSymbol(pair) {
   updatePreview();
 }
 
+function visibleTextFields() {
+  return Array.from(document.querySelectorAll('.editor-panel input[type="text"], .editor-panel textarea'))
+    .filter(field => !field.closest("[hidden]"));
+}
+
 function clearInputs() {
-  const type = getType();
-  if (isLyrics()) {
-    document.querySelectorAll("[data-lyrics]").forEach(input => { input.value = ""; });
-    lastFocusedTextField = document.querySelector('[data-lyrics="title"]');
-    updatePreview();
-    setStatus("현재 레이아웃의 입력 내용을 지웠습니다.");
-    return;
-  }
-  if (isStrato()) {
-    const section = getType() === "public" ? "#stratoFrontFields" : "#stratoBackFields";
-    document.querySelector(section).querySelectorAll("[data-strato]").forEach(input => { input.value = ""; });
-  }
-  if (!document.querySelector("#fragmentFields").hidden) {
-    document.querySelectorAll("[data-fragment]").forEach(input => { input.value = ""; });
-  }
-  if (!fields.enigmaFields.hidden) {
-    fields.title.value = "";
-    fields.enigmaCondition.value = "";
-    fields.enigmaEffect.value = "";
-    lastFocusedTextField = fields.enigmaCondition;
-    updatePreview();
-    setStatus("현재 레이아웃의 입력 내용을 지웠습니다.");
-    return;
-  }
-
-  if (type === "public") {
-    fields.title.value = "";
-    fields.body.value = "";
-  } else if (type === "secret") {
-    fields.meta.value = "";
-    fields.body.value = "";
-  } else if (type === "madness") {
-    fields.title.value = "";
-    fields.meta.value = "";
-    fields.body.value = "";
-  } else if (type === "ritual") {
-    fields.title.value = "";
-    fields.ritualRows.querySelectorAll(".ritual-input").forEach((input) => {
-      input.value = "";
-    });
-  }
-
-  lastFocusedTextField = fields.body;
+  const visible = visibleTextFields();
+  visible.forEach(field => { field.value = ""; });
+  lastFocusedTextField = visible.includes(fields.body) ? fields.body : visible[0];
   updatePreview();
   setStatus("현재 레이아웃의 입력 내용을 지웠습니다.");
+}
+
+function downloadFileName() {
+  const type = getType();
+  if (isLyrics()) return "stratoshout-lyrics-sheet.png";
+  if (isStrato()) return `stratoshout-shackle-${type === "public" ? "front" : "back"}.png`;
+  if (isMagica()) return `magicalogica-${selectedValue("magicaTab")}-${type}-handout.png`;
+  if (isShinobi()) return `shinobigami-${selectedValue("shinobiTab")}-${type}-handout.png`;
+  return TYPE_CONFIG[type].fileName;
 }
 
 async function savePng() {
@@ -393,7 +355,7 @@ async function savePng() {
   });
 
   const link = document.createElement("a");
-  link.download = isLyrics() ? "stratoshout-lyrics-sheet.png" : isStrato() ? `stratoshout-shackle-${getType() === "public" ? "front" : "back"}.png` : isMagica() ? `magicalogica-${document.querySelector('input[name="magicaTab"]:checked').value}-${getType()}-handout.png` : isShinobi() ? `shinobigami-${document.querySelector('input[name="shinobiTab"]:checked').value}-${getType()}-handout.png` : TYPE_CONFIG[getType()].fileName;
+  link.download = downloadFileName();
   link.href = dataUrl;
   link.click();
   setStatus("PNG 파일을 저장했습니다.");
@@ -406,21 +368,6 @@ function registerTextField(field) {
   field.addEventListener("input", updatePreview);
 }
 
-buildRitualInputs();
-[fields.title, fields.meta, fields.body, fields.enigmaCondition, fields.enigmaEffect].forEach(registerTextField);
-fields.ritualRows.querySelectorAll(".ritual-input").forEach(registerTextField);
-fields.symbolButtons.forEach((button) => {
-  button.addEventListener("click", () => insertSymbol(button.dataset.insert));
-});
-fields.typeRadios.forEach((radio) => radio.addEventListener("change", updatePreview));
-fields.clearButton.addEventListener("click", clearInputs);
-fields.copyButton.addEventListener("click", () => {
-  copyHtml().catch(() => setStatus("클립보드 복사 권한을 확인해 주세요."));
-});
-fields.saveButton.addEventListener("click", () => {
-  savePng().catch(() => setStatus("PNG 저장 중 오류가 발생했습니다."));
-});
-
 function setStatus(message) {
   fields.status.textContent = message;
   window.clearTimeout(setStatus.timer);
@@ -428,8 +375,6 @@ function setStatus(message) {
     fields.status.textContent = "";
   }, 2600);
 }
-
-updatePreview();
 
 function fitMadnessTrigger() {
   const trigger = fields.preview.querySelector("[data-trigger]");
@@ -440,17 +385,6 @@ function fitMadnessTrigger() {
     trigger.style.lineHeight = "1.1";
   }
 }
-
-window.addEventListener("hashchange", updatePreview);
-
-document.querySelectorAll('input[name="shinobiTab"], input[name="shinobiVisibility"]').forEach((radio) => radio.addEventListener("change", updatePreview));
-
-document.querySelectorAll('input[name="magicaVisibility"], input[name="magicaTab"]').forEach((radio) => radio.addEventListener("change", updatePreview));
-
-document.querySelectorAll("[data-fragment]").forEach(registerTextField);
-
-document.querySelectorAll("[data-strato]").forEach(registerTextField);
-document.querySelectorAll('input[name="stratoSide"]').forEach(radio => radio.addEventListener("change", updatePreview));
 
 function constrainCardText() {
   const card = fields.preview.firstElementChild;
@@ -466,5 +400,24 @@ function constrainCardText() {
   });
 }
 
-document.querySelectorAll("[data-lyrics]").forEach(registerTextField);
-document.querySelectorAll('input[name="stratoTab"]').forEach(radio => radio.addEventListener("change", updatePreview));
+// Initialize generated fields before registering their input events.
+buildRitualInputs();
+document.querySelectorAll('.editor-panel input[type="text"], .editor-panel textarea').forEach(registerTextField);
+document.querySelectorAll('.editor-panel input[type="radio"]').forEach(radio => radio.addEventListener("change", updatePreview));
+fields.symbolButtons.forEach((button) => {
+  button.addEventListener("click", () => insertSymbol(button.dataset.insert));
+});
+fields.clearButton.addEventListener("click", clearInputs);
+fields.copyButton.addEventListener("click", () => {
+  copyHtml().catch(() => setStatus("클립보드 복사 권한을 확인해 주세요."));
+});
+fields.saveButton.addEventListener("click", () => {
+  savePng().catch(() => setStatus("PNG 저장 중 오류가 발생했습니다."));
+});
+
+window.addEventListener("hashchange", () => {
+  showPage();
+  updatePreview();
+});
+showPage();
+updatePreview();

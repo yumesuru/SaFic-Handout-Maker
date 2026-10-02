@@ -1,21 +1,23 @@
-* {
+*  {
   box-sizing: border-box;
 }
 
-body {
+body  {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   margin: 0;
   color: #111;
   background: #fff;
   font-family: Arial, "Noto Sans KR", sans-serif;
 }
 
-button,
-input,
-textarea {
+button, input, textarea  {
   font: inherit;
 }
 
-.app-shell {
+.app-shell  {
+  flex: 1;
   display: grid;
   grid-template-columns: 360px 1fr;
   gap: 24px;
@@ -23,87 +25,71 @@ textarea {
   padding: 24px;
 }
 
-.editor-panel {
+.editor-panel  {
   border: 1px solid #ccc;
   padding: 16px;
 }
 
-.eyebrow {
-  margin: 0 0 4px;
-  font-size: 12px;
-}
-
-h1 {
+h1  {
   margin: 0;
   font-size: 24px;
   line-height: 1.2;
 }
 
-.control-group,
-.stacked-field,
-.field-grid label {
+.control-group, .stacked-field, .field-grid label  {
   display: grid;
   gap: 6px;
 }
 
-.control-group,
-.field-grid,
-.stacked-field {
+.control-group, .field-grid, .stacked-field  {
   margin-top: 14px;
 }
 
-.field-grid {
+.field-grid  {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
 }
 
-.symbol-toolbar {
+.symbol-toolbar  {
+  flex-wrap: wrap;
   display: flex;
   gap: 8px;
   margin-top: 14px;
 }
 
-.symbol-toolbar button {
+.symbol-toolbar button  {
   min-width: 52px;
 }
 
-#clearInputsButton {
+#clearInputsButton  {
   min-width: 88px;
 }
 
-.ritual-fields {
+.ritual-fields  {
   display: grid;
   gap: 6px;
   margin-top: 14px;
 }
 
-.ritual-header,
-.ritual-row {
+.ritual-header, .ritual-row  {
   display: grid;
   grid-template-columns: 38px 1fr 1fr 1fr 1fr;
   gap: 6px;
   align-items: center;
 }
 
-.ritual-header {
+.ritual-header  {
   font-size: 12px;
   font-weight: bold;
 }
 
-.ritual-row span {
-  text-align: center;
-  font-size: 13px;
-}
-
-label span,
-.control-group > label {
+label span, .control-group > label  {
   font-size: 14px;
   font-weight: bold;
 }
 
-input,
-textarea {
+input, textarea  {
   width: 100%;
   border: 1px solid #aaa;
   border-radius: 0;
@@ -112,34 +98,33 @@ textarea {
   outline: none;
 }
 
-input {
+input  {
   height: 34px;
   padding: 0 8px;
 }
 
-textarea {
+textarea  {
   min-height: 68px;
   resize: vertical;
   padding: 8px;
   line-height: 1.5;
 }
 
-#bodyInput {
+#bodyInput  {
   min-height: 180px;
 }
 
-input:focus,
-textarea:focus {
+input:focus, textarea:focus  {
   border-color: #111;
 }
 
-.segmented {
+.segmented  {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   border: 1px solid #aaa;
 }
 
-.segmented input {
+.segmented input  {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -147,7 +132,7 @@ textarea:focus {
   pointer-events: none;
 }
 
-.segmented label {
+.segmented label  {
   display: grid;
   min-height: 34px;
   place-items: center;
@@ -156,23 +141,23 @@ textarea:focus {
   cursor: pointer;
 }
 
-.segmented label:last-child {
+.segmented label:last-child  {
   border-right: 0;
 }
 
-.segmented input:checked + label {
+.segmented input:checked + label  {
   color: #fff;
   background: #111;
 }
 
-.button-row {
+.button-row  {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-top: 16px;
 }
 
-button {
+button  {
   min-height: 36px;
   border: 1px solid #111;
   border-radius: 0;
@@ -181,17 +166,17 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+button:hover  {
   background: #eee;
 }
 
-.status-message {
+.status-message  {
   min-height: 20px;
   margin: 10px 0 0;
   font-size: 13px;
 }
 
-.preview-panel {
+.preview-panel  {
   display: grid;
   align-content: start;
   justify-content: center;
@@ -200,50 +185,165 @@ button:hover {
   overflow: auto;
 }
 
-#handoutPreview {
+#handoutPreview  {
   width: max-content;
 }
 
-[hidden] {
+[hidden]  {
   display: none !important;
 }
 
-@media (max-width: 820px) {
-  .app-shell {
+@media (max-width: 820px)  {
+  .app-shell  {
     grid-template-columns: 1fr;
     padding: 12px;
   }
-
-  .button-row {
+  .button-row  {
     grid-template-columns: 1fr;
   }
 }
 
-body { min-height: 100vh; display: flex; flex-direction: column; }
-.home-page { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 36px; padding: 64px 24px; text-align: center; }
-.home-page h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.4; word-break: keep-all; }
-.rule-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 200px)); justify-content: center; gap: 16px; width: 100%; max-width: 848px; }
-.rule-button { aspect-ratio: 1 / 1; border: 1px solid #111; border-radius: 0; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; padding: 12px; color: #111; text-decoration: none; }
-.rule-button span { display: block; font-size: 13px; font-weight: normal; line-height: 1.5; }
-.rule-button strong { display: block; font-size: 24px; line-height: 1.4; font-weight: 700; word-break: keep-all; }
-.rule-button:hover { background: #eee; text-decoration: none; }
-a:focus-visible, button:focus-visible { outline: 2px solid #111; outline-offset: 4px; }
-.app-shell { flex: 1; }
-.back-link { display: inline-block; color: #000; font-size: 14px; font-weight: bold; text-decoration: none; margin-bottom: 20px; }
-.back-link:hover { text-decoration: none; }
-.pending-page { flex: 1; width: 100%; max-width: 900px; margin: auto; padding: 64px 24px; }
-.site-footer { padding: 24px; border-top: 1px solid #ddd; text-align: center; color: #555; font-size: 13px; line-height: 1.8; word-break: keep-all; }
-.site-footer p { margin: 0; }
-.site-footer a { color: inherit; text-underline-offset: 3px; }
-.symbol-toolbar { flex-wrap: wrap; }
-@media (max-width: 820px) { .rule-grid { grid-template-columns: repeat(2, minmax(0, 210px)); max-width: 440px; } }
-@media (max-width: 420px) { .home-page { padding: 48px 16px; gap: 28px; } .rule-grid { gap: 12px; } .rule-button span { font-size: 11px; } .rule-button strong { font-size: 19px; } .site-footer { padding: 20px 16px; } }
-.three-tabs { grid-template-columns: repeat(3, 1fr); }
-.two-tabs { grid-template-columns: repeat(2, 1fr); }
-button:disabled { opacity: 0.5; cursor: default; }
+.home-page  {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 36px;
+  padding: 64px 24px;
+  text-align: center;
+}
 
-.one-tab { grid-template-columns: 1fr; }
+.home-page h1  {
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.4;
+  word-break: keep-all;
+}
 
-.fragment-fields { display:grid; gap:12px; margin-top:14px; }
-.fragment-input-row { display:grid; gap:8px; }
-.fragment-input-row label { display:grid; gap:6px; min-width:0; }
+.rule-grid  {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 200px));
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 848px;
+}
+
+.rule-button  {
+  aspect-ratio: 1 / 1;
+  border: 1px solid #111;
+  border-radius: 0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  color: #111;
+  text-decoration: none;
+}
+
+.rule-button span  {
+  display: block;
+  font-size: 13px;
+  font-weight: normal;
+  line-height: 1.5;
+}
+
+.rule-button strong  {
+  display: block;
+  font-size: 24px;
+  line-height: 1.4;
+  font-weight: 700;
+  word-break: keep-all;
+}
+
+.rule-button:hover  {
+  background: #eee;
+  text-decoration: none;
+}
+
+a:focus-visible, button:focus-visible  {
+  outline: 2px solid #111;
+  outline-offset: 4px;
+}
+
+.back-link  {
+  display: inline-block;
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+  text-decoration: none;
+  margin-bottom: 20px;
+}
+
+.site-footer  {
+  padding: 24px;
+  border-top: 1px solid #ddd;
+  text-align: center;
+  color: #555;
+  font-size: 13px;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+
+.site-footer p  {
+  margin: 0;
+}
+
+.site-footer a  {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 820px)  {
+  .rule-grid  {
+    grid-template-columns: repeat(2, minmax(0, 210px));
+    max-width: 440px;
+  }
+}
+
+@media (max-width: 420px)  {
+  .home-page  {
+    padding: 48px 16px;
+    gap: 28px;
+  }
+  .rule-grid  {
+    gap: 12px;
+  }
+  .rule-button span  {
+    font-size: 11px;
+  }
+  .rule-button strong  {
+    font-size: 19px;
+  }
+  .site-footer  {
+    padding: 20px 16px;
+  }
+}
+
+.three-tabs  {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.two-tabs  {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.fragment-fields  {
+  display:grid;
+  gap:12px;
+  margin-top:14px;
+}
+
+.fragment-input-row  {
+  display:grid;
+  gap:8px;
+}
+
+.fragment-input-row label  {
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
