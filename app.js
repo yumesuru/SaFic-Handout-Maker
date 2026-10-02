@@ -99,7 +99,6 @@ function escapeHtml(text) {
 function triggerHtml(text) {
   return text
     .split(/\r?\n/)
-    .slice(0, 2)
     .map((line) => `<div>${escapeHtml(line)}</div>`)
     .join("");
 }
@@ -113,7 +112,7 @@ function secretHtml(data) {
 }
 
 function madnessHtml(data) {
-  return `<div style="width:300px; height:434px; box-sizing:border-box; background:#000; font-family:Arial, 'Noto Sans KR', sans-serif; color:#fff; padding-top:10px;"><div style="text-align:center; font-size:24px; line-height:1.2; margin-bottom:8px;">Handout</div><div style="width:280px; height:364px; margin:0 auto; border:3px solid #fff; box-sizing:border-box; padding:3px;"><div style="width:100%; height:100%; box-sizing:border-box; position:relative;"><div style="background:#fff; color:#000;"><div style="display:flex; height:32px; border-bottom:1px solid #000; box-sizing:border-box;"><div style="width:60px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">광기</div><div style="flex:1; display:flex; align-items:center; padding-left:11px; font-size:16px; font-weight:bold; box-sizing:border-box;">${escapeHtml(data.title)}</div></div><div style="display:flex; height:33px; border-bottom:1px solid #000; box-sizing:border-box;"><div style="width:60px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">트리거</div><div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding-left:11px; font-size:11px; line-height:1.1; box-sizing:border-box; transform:translateY(1px);">${triggerHtml(data.meta)}</div></div><div style="height:264px; color:#000; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div></div><div style="position:absolute; left:0; right:0; bottom:0; height:34px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; box-sizing:border-box; transform:translateY(6px);">이 광기를 스스로 밝힐 수는 없다.</div></div></div></div>`;
+  return `<div style="width:300px; height:434px; box-sizing:border-box; background:#000; font-family:Arial, 'Noto Sans KR', sans-serif; color:#fff; padding-top:10px;"><div style="text-align:center; font-size:24px; line-height:1.2; margin-bottom:8px;">Handout</div><div style="width:280px; height:364px; margin:0 auto; border:3px solid #fff; box-sizing:border-box; padding:3px;"><div style="width:100%; height:100%; box-sizing:border-box; position:relative;"><div style="background:#fff; color:#000;"><div style="display:flex; height:32px; border-bottom:1px solid #000; box-sizing:border-box;"><div style="width:60px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">광기</div><div style="flex:1; display:flex; align-items:center; padding-left:11px; font-size:16px; font-weight:bold; box-sizing:border-box;">${escapeHtml(data.title)}</div></div><div style="display:flex; height:33px; border-bottom:1px solid #000; box-sizing:border-box;"><div style="width:60px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">트리거</div><div data-trigger style="flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; padding-left:11px; font-size:16px; line-height:1; overflow-wrap:anywhere; box-sizing:border-box;"><div data-trigger-text style="flex-shrink:0; width:100%;">${triggerHtml(data.meta)}</div></div></div><div style="height:264px; color:#000; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div></div><div style="position:absolute; left:0; right:0; bottom:0; height:34px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; box-sizing:border-box; transform:translateY(6px);">이 광기를 스스로 밝힐 수는 없다.</div></div></div></div>`;
 }
 
 function ritualCellHtml(text, extraStyle = "") {
@@ -149,10 +148,12 @@ function updatePreview() {
   fields.ritualFields.hidden = type !== "ritual";
   fields.metaLabel.textContent = type === "secret" ? "쇼크" : "트리거";
   fields.preview.innerHTML = handoutHtml(type, values());
+  fitMadnessTrigger();
 }
 
 function getSelfContainedHtml() {
-  return handoutHtml(getType(), values());
+  updatePreview();
+  return fields.preview.firstElementChild.outerHTML;
 }
 
 function fallbackCopy(text) {
@@ -285,3 +286,15 @@ function setStatus(message) {
 }
 
 updatePreview();
+
+function fitMadnessTrigger() {
+  const trigger = fields.preview.querySelector("[data-trigger]");
+  if (!trigger) return;
+  const text = trigger.querySelector("[data-trigger-text]");
+  if (text.getBoundingClientRect().height > 32.5) {
+    trigger.style.fontSize = "11px";
+    trigger.style.lineHeight = "1.1";
+  }
+}
+
+window.addEventListener("hashchange", updatePreview);
