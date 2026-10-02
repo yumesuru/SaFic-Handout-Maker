@@ -224,13 +224,13 @@ button:hover {
 }
 
 body { min-height: 100vh; display: flex; flex-direction: column; }
-.home-page { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 44px; padding: 72px 24px; text-align: center; }
-.home-page h1 { font-size: clamp(28px, 4vw, 46px); line-height: 1.4; word-break: keep-all; }
-.rule-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 210px)); gap: 20px; width: 100%; max-width: 900px; }
-.rule-button { aspect-ratio: 1; border: 1px solid #111; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; padding: 12px; color: #111; text-decoration: none; }
-.rule-button span { font-size: 14px; }
-.rule-button strong { font-size: 24px; font-weight: 700; word-break: keep-all; }
-.rule-button:hover { background: #f3f3f3; }
+.home-page { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 36px; padding: 64px 24px; text-align: center; }
+.home-page h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.4; word-break: keep-all; }
+.rule-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 200px)); justify-content: center; gap: 16px; width: 100%; max-width: 848px; }
+.rule-button { aspect-ratio: 1 / 1; border: 1px solid #111; border-radius: 0; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; padding: 12px; color: #111; text-decoration: none; }
+.rule-button span { display: block; font-size: 13px; font-weight: normal; line-height: 1.5; }
+.rule-button strong { display: block; font-size: 24px; line-height: 1.4; font-weight: 700; word-break: keep-all; }
+.rule-button:hover { background: #eee; }
 a:focus-visible, button:focus-visible { outline: 2px solid #111; outline-offset: 4px; }
 .app-shell { flex: 1; }
 .back-link { display: inline-block; color: #111; font-size: 14px; margin-bottom: 20px; }
