@@ -49,11 +49,15 @@ const fields = {
 };
 
 let lastFocusedTextField = fields.body;
+const formDrafts = new Map();
+let activeFormKey = null;
+let textFields = [];
+let defaultTextValues = [];
 
 function buildRitualInputs() {
   const rows = [];
   for (let step = 1; step <= RITUAL_STEPS; step += 1) {
-    rows.push(`<div class="ritual-row"><input class="ritual-input" data-step="${step}" data-key="step" type="text"><input class="ritual-input" data-step="${step}" data-key="name" type="text"><input class="ritual-input" data-step="${step}" data-key="skill" type="text" placeholder="특기명"><input class="ritual-input" data-step="${step}" data-key="condition" type="text"><input class="ritual-input" data-step="${step}" data-key="penalty" type="text"></div>`);
+    rows.push(`<div class="ritual-row"><input class="ritual-input" data-step="${step}" data-key="step" type="text"><input class="ritual-input" data-step="${step}" data-key="name" type="text"><input class="ritual-input" data-step="${step}" data-key="skill" type="text"><input class="ritual-input" data-step="${step}" data-key="condition" type="text"><input class="ritual-input" data-step="${step}" data-key="penalty" type="text"></div>`);
   }
   fields.ritualRows.innerHTML = rows.join("");
 }
@@ -69,6 +73,26 @@ function readInputGroup(key) {
 function getType() {
   const group = isStrato() ? "stratoSide" : isMagica() ? "magicaVisibility" : isShinobi() ? "shinobiVisibility" : "handoutType";
   return selectedValue(group);
+}
+
+function getFormKey() {
+  const rule = window.location.hash.slice(1);
+  if (!Object.prototype.hasOwnProperty.call(RULE_NAMES, rule)) return null;
+  if (isLyrics()) return "stratoshout:lyrics";
+  const tab = isStrato() ? "card" : isMagica() ? selectedValue("magicaTab") : isShinobi() ? selectedValue("shinobiTab") : "handout";
+  return `${rule}:${tab}:${getType()}`;
+}
+
+function switchFormDraft() {
+  const nextKey = getFormKey();
+  if (!nextKey || nextKey === activeFormKey) return;
+
+  // Capture the outgoing form before reusing its inputs for another layout.
+  if (activeFormKey) formDrafts.set(activeFormKey, textFields.map(field => field.value));
+  const draft = formDrafts.get(nextKey) || defaultTextValues;
+  textFields.forEach((field, index) => { field.value = draft[index]; });
+  activeFormKey = nextKey;
+  lastFocusedTextField = fields.body;
 }
 
 function values() {
@@ -119,16 +143,19 @@ function triggerHtml(text) {
     .join("");
 }
 
+// Flexible frames keep the original 300 × 420 minimum and grow with their body.
+// The 9.2px bottom padding preserves the original space below the 28.8px heading.
 function publicHtml(data) {
-  return `<div style="width:300px; height:420px; box-sizing:border-box; border:1px solid #111; background:#fff; font-family:Arial, 'Noto Sans KR', sans-serif; color:#111; padding-top:10px;"><div style="text-align:center; font-size:24px; font-weight:500; line-height:1.2; margin-bottom:6px;">Handout</div><div style="width:278px; height:364px; margin:0 auto; border:2px solid #111; box-sizing:border-box; padding:3px;"><div style="width:100%; height:100%; border:1px solid #666; box-sizing:border-box;"><div style="display:flex; height:38px; border-bottom:1px solid #111; box-sizing:border-box;"><div style="width:53px; border-right:1px solid #777; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">이름</div><div style="flex:1; display:flex; align-items:center; padding-left:11px; font-size:16px; line-height:1; box-sizing:border-box;">${escapeHtml(data.title)}</div></div><div style="height:31px; border-bottom:1px solid #111; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">사명</div><div style="height:calc(100% - 69px); overflow:hidden; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div></div></div></div>`;
+  return `<div style="width:300px; min-height:420px; display:flex; flex-direction:column; box-sizing:border-box; border:1px solid #111; background:#fff; font-family:Arial, 'Noto Sans KR', sans-serif; color:#111; padding:10px 0 9.2px;"><div style="text-align:center; font-size:24px; font-weight:500; line-height:1.2; margin-bottom:6px;">Handout</div><div style="width:278px; min-height:364px; flex:1; display:flex; flex-direction:column; margin:0 auto; border:2px solid #111; box-sizing:border-box; padding:3px;"><div style="width:100%; flex:1; display:flex; flex-direction:column; border:1px solid #666; box-sizing:border-box;"><div style="display:flex; height:38px; flex-shrink:0; border-bottom:1px solid #111; box-sizing:border-box;"><div style="width:53px; border-right:1px solid #777; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">이름</div><div style="flex:1; display:flex; align-items:center; padding-left:11px; font-size:16px; line-height:1; box-sizing:border-box;">${escapeHtml(data.title)}</div></div><div style="height:31px; flex-shrink:0; border-bottom:1px solid #111; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">사명</div><div style="flex:1; overflow-wrap:anywhere; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div></div></div></div>`;
 }
 
+// Reserve the original 23px footer area while the body and both borders grow.
 function secretHtml(data) {
-  return `<div style="width:300px; height:420px; overflow:hidden; box-sizing:border-box; background:#000; font-family:Arial, 'Noto Sans KR', sans-serif; color:#fff; padding-top:10px;"><div style="text-align:center; font-size:24px; font-weight:500; line-height:1.2; margin-bottom:6px;">Handout</div><div style="width:280px; height:366px; margin:0 auto; border:3px solid #fff; box-sizing:border-box; padding:3px;"><div style="width:100%; height:100%; border:1px solid #fff; box-sizing:border-box; position:relative;"><div style="height:28px; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">비밀</div><div style="display:flex; height:39px; background:#fff; color:#000; border-bottom:1px solid #000; box-sizing:border-box; margin-left:2px; margin-right:2px;"><div style="width:53px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">쇼크</div><div style="flex:1; display:flex; align-items:center; padding-left:11px; font-size:16px; line-height:1; box-sizing:border-box;">${escapeHtml(data.meta)}</div></div><div style="height:262px; background:#fff; color:#000; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box; margin-left:2px; margin-right:2px;">${escapeHtml(data.body)}</div><div style="position:absolute; left:0; right:0; bottom:0; height:34px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; box-sizing:border-box; transform:translateY(5px);">이 비밀을 스스로 밝힐 수는 없다.</div></div></div></div>`;
+  return `<div style="width:300px; min-height:420px; display:flex; flex-direction:column; overflow:hidden; box-sizing:border-box; background:#000; font-family:Arial, 'Noto Sans KR', sans-serif; color:#fff; padding:10px 0 9.2px;"><div style="text-align:center; font-size:24px; font-weight:500; line-height:1.2; margin-bottom:6px;">Handout</div><div style="width:280px; min-height:366px; flex:1; display:flex; flex-direction:column; margin:0 auto; border:3px solid #fff; box-sizing:border-box; padding:3px;"><div style="width:100%; flex:1; display:flex; flex-direction:column; padding-bottom:23px; border:1px solid #fff; box-sizing:border-box; position:relative;"><div style="height:28px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">비밀</div><div style="display:flex; height:39px; flex-shrink:0; background:#fff; color:#000; border-bottom:1px solid #000; box-sizing:border-box; margin-left:2px; margin-right:2px;"><div style="width:53px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">쇼크</div><div style="flex:1; display:flex; align-items:center; padding-left:11px; font-size:16px; line-height:1; box-sizing:border-box;">${escapeHtml(data.meta)}</div></div><div style="min-height:262px; flex:1; overflow-wrap:anywhere; background:#fff; color:#000; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box; margin-left:2px; margin-right:2px;">${escapeHtml(data.body)}</div><div style="position:absolute; left:0; right:0; bottom:0; height:34px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; box-sizing:border-box; transform:translateY(5px);">이 비밀을 스스로 밝힐 수는 없다.</div></div></div></div>`;
 }
 
 function madnessHtml(data) {
-  return `<div style="width:300px; height:420px; overflow:hidden; box-sizing:border-box; background:#000; font-family:Arial, 'Noto Sans KR', sans-serif; color:#fff; padding-top:10px;"><div style="text-align:center; font-size:24px; font-weight:500; line-height:1.2; margin-bottom:8px;">Handout</div><div style="width:280px; height:364px; margin:0 auto; border:3px solid #fff; box-sizing:border-box; padding:3px;"><div style="width:100%; height:100%; box-sizing:border-box; position:relative;"><div style="background:#fff; color:#000;"><div style="display:flex; height:32px; border-bottom:1px solid #000; box-sizing:border-box;"><div style="width:60px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">광기</div><div style="flex:1; display:flex; align-items:center; padding-left:11px; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">${escapeHtml(data.title)}</div></div><div style="display:flex; height:33px; border-bottom:1px solid #000; box-sizing:border-box;"><div style="width:60px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">트리거</div><div data-trigger style="flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; padding-left:11px; font-size:16px; line-height:1; overflow-wrap:anywhere; box-sizing:border-box;"><div data-trigger-text style="flex-shrink:0; width:100%;">${triggerHtml(data.meta)}</div></div></div><div style="height:264px; color:#000; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div></div><div style="position:absolute; left:0; right:0; bottom:0; height:34px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; box-sizing:border-box; transform:translateY(6px);">이 광기를 스스로 밝힐 수는 없다.</div></div></div></div>`;
+  return `<div style="width:300px; min-height:420px; display:flex; flex-direction:column; overflow:hidden; box-sizing:border-box; background:#000; font-family:Arial, 'Noto Sans KR', sans-serif; color:#fff; padding:10px 0 9.2px;"><div style="text-align:center; font-size:24px; font-weight:500; line-height:1.2; margin-bottom:8px;">Handout</div><div style="width:280px; min-height:364px; flex:1; display:flex; flex-direction:column; margin:0 auto; border:3px solid #fff; box-sizing:border-box; padding:3px;"><div style="width:100%; flex:1; display:flex; flex-direction:column; padding-bottom:23px; box-sizing:border-box; position:relative;"><div style="background:#fff; color:#000; flex:1; display:flex; flex-direction:column;"><div style="display:flex; height:32px; flex-shrink:0; border-bottom:1px solid #000; box-sizing:border-box;"><div style="width:60px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">광기</div><div style="flex:1; display:flex; align-items:center; padding-left:11px; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">${escapeHtml(data.title)}</div></div><div style="display:flex; height:33px; flex-shrink:0; border-bottom:1px solid #000; box-sizing:border-box;"><div style="width:60px; border-right:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">트리거</div><div data-trigger style="flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; padding-left:11px; font-size:16px; line-height:1; overflow-wrap:anywhere; box-sizing:border-box;"><div data-trigger-text style="flex-shrink:0; width:100%;">${triggerHtml(data.meta)}</div></div></div><div style="min-height:264px; flex:1; overflow-wrap:anywhere; color:#000; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div></div><div style="position:absolute; left:0; right:0; bottom:0; height:34px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; box-sizing:border-box; transform:translateY(6px);">이 광기를 스스로 밝힐 수는 없다.</div></div></div></div>`;
 }
 
 function ritualCellHtml(text) {
@@ -149,7 +176,7 @@ function ritualHtml(data) {
 }
 
 function shinobiSecretHtml(data) {
-  return `<div style="width:300px; height:420px; overflow:hidden; box-sizing:border-box; background:#000; font-family:Arial, 'Noto Sans KR', sans-serif; color:#fff; padding-top:10px;"><div style="text-align:center; font-size:24px; font-weight:500; line-height:1.2;">Handout</div><div style="height:45px; display:flex; align-items:flex-end; justify-content:center; box-sizing:border-box; padding-bottom:9px;"><div style="text-align:center; font-size:12px; line-height:1.2; margin:0;">이 비밀을<br>스스로 밝힐 수는 없다</div></div><div style="width:280px; height:327px; margin:0 auto; border:3px solid #fff; box-sizing:border-box; padding:3px;"><div style="width:100%; height:100%; border:1px solid #fff; box-sizing:border-box; display:flex; flex-direction:column;"><div style="height:28px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">비밀</div><div style="flex:1; min-height:0; overflow:hidden; background:#fff; color:#000; margin:0 2px; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div></div></div></div>`;
+  return `<div style="width:300px; min-height:420px; display:flex; flex-direction:column; overflow:hidden; box-sizing:border-box; background:#000; font-family:Arial, 'Noto Sans KR', sans-serif; color:#fff; padding:10px 0 9.2px;"><div style="text-align:center; font-size:24px; font-weight:500; line-height:1.2;">Handout</div><div style="height:45px; display:flex; align-items:flex-end; justify-content:center; box-sizing:border-box; padding-bottom:9px;"><div style="text-align:center; font-size:12px; line-height:1.2; margin:0;">이 비밀을<br>스스로 밝힐 수는 없다</div></div><div style="width:280px; min-height:327px; flex:1; display:flex; flex-direction:column; margin:0 auto; border:3px solid #fff; box-sizing:border-box; padding:3px;"><div style="width:100%; flex:1; border:1px solid #fff; box-sizing:border-box; display:flex; flex-direction:column;"><div style="height:28px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:bold; box-sizing:border-box;">비밀</div><div style="flex:1; overflow-wrap:anywhere; background:#fff; color:#000; margin:0 2px; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div></div></div></div>`;
 }
 
 function personaSecretHtml(data) {
@@ -166,12 +193,12 @@ function personaSecretHtml(data) {
 }
 
 function enigmaSectionHtml(label, text, divided) {
-  return `<div style="min-height:0; overflow:hidden; box-sizing:border-box; padding:0 5px 5px;${divided ? ' border-bottom:1px solid #111;' : ''}"><div style="height:7px; margin:8px 0 8px; border-radius:4px; background:#666; text-align:center;"><span style="position:relative; top:-9px; font-size:10px; line-height:12px; font-weight:bold; color:#333; text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff;">${label}</span></div><div style="padding:0 5px; font-size:16px; line-height:1.5; overflow-wrap:anywhere;">${escapeHtml(text)}</div></div>`;
+  return `<div style="box-sizing:border-box; padding:0 5px 5px;${divided ? ' border-bottom:1px solid #111;' : ''}"><div style="height:7px; margin:8px 0 8px; border-radius:4px; background:#666; text-align:center;"><span style="position:relative; top:-9px; font-size:10px; line-height:12px; font-weight:bold; color:#333; text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff;">${label}</span></div><div style="padding:0 5px; font-size:16px; line-height:1.5; overflow-wrap:anywhere;">${escapeHtml(text)}</div></div>`;
 }
 
 function enigmaSecretHtml(data) {
-  const originalBody = `<div style="height:calc(100% - 69px); overflow:hidden; background:#fff; color:#111; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div>`;
-  const splitBody = `<div style="height:calc(100% - 69px); display:grid; grid-template-rows:repeat(2,minmax(0,1fr)); background:#fff; color:#111; box-sizing:border-box;">${enigmaSectionHtml('해제 조건', data.condition, true)}${enigmaSectionHtml('효과', data.effect, false)}</div>`;
+  const originalBody = `<div style="flex:1; overflow-wrap:anywhere; background:#fff; color:#111; padding:10px; font-size:16px; line-height:1.5; box-sizing:border-box;">${escapeHtml(data.body)}</div>`;
+  const splitBody = `<div style="flex:1; display:grid; grid-template-rows:repeat(2,minmax(min-content,1fr)); background:#fff; color:#111; box-sizing:border-box;">${enigmaSectionHtml('해제 조건', data.condition, true)}${enigmaSectionHtml('효과', data.effect, false)}</div>`;
   return personaSecretHtml(data)
     .replace(">페르소나</div>", ">에니그마</div>")
     .replace(">진실</div>", ">전력</div>")
@@ -180,7 +207,7 @@ function enigmaSecretHtml(data) {
 
 function fragmentInfoHtml(data) {
   const groups = [[["name","단장"]],[["depth","초기 빙의 심도"]],[["attack","공격력"],["defense","방어력"],["source","근원력"]],[["mana","마력"]],[["magic","마법"]],[["domain","영역"],["skill","특기"]]];
-  return `<div style="height:100%; display:grid; grid-template-rows:repeat(6,minmax(0,1fr)); box-sizing:border-box;">${groups.map(group => `<div style="display:grid; grid-template-columns:repeat(${group.length},minmax(0,1fr)); min-height:0;">${group.map(([key,label]) => `<div style="display:flex; align-items:center; min-width:0; padding:0 5px; font-size:14px; line-height:1.2; box-sizing:border-box;"><span style="flex-shrink:0;">${label}${key === 'name' ? ' 〈' : ':'}</span><span style="flex:1; min-width:0; overflow-wrap:anywhere; white-space:pre-wrap;">${escapeHtml(data.fragment[key] || '')}</span>${key === 'name' ? '<span>〉</span>' : ''}</div>`).join('')}</div>`).join('')}</div>`;
+  return `<div style="flex:1; display:grid; grid-template-rows:repeat(6,minmax(min-content,1fr)); box-sizing:border-box;">${groups.map(group => `<div style="display:grid; grid-template-columns:repeat(${group.length},minmax(0,1fr));">${group.map(([key,label]) => `<div style="display:flex; align-items:center; min-width:0; padding:0 5px; font-size:14px; line-height:1.2; box-sizing:border-box;"><span style="flex-shrink:0;">${label}${key === 'name' ? ' 〈' : ':'}</span><span style="flex:1; min-width:0; overflow-wrap:anywhere; white-space:pre-wrap;">${escapeHtml(data.fragment[key] || '')}</span>${key === 'name' ? '<span>〉</span>' : ''}</div>`).join('')}</div>`).join('')}</div>`;
 }
 
 function magicaHtml(type, data) {
@@ -190,18 +217,18 @@ function magicaHtml(type, data) {
   const nameRow = secret ? "" : `<div style="display:flex; height:38px; flex-shrink:0; border-bottom:1px solid #111; box-sizing:border-box;"><div style="width:53px; flex-shrink:0; border-right:1px solid #111; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:bold; box-sizing:border-box;">이름</div><div style="flex:1; min-width:0; display:flex; align-items:center; padding-left:11px; font-size:16px; line-height:1; box-sizing:border-box;">${escapeHtml(data.title)}</div></div>`;
   const fragment = selectedValue("magicaTab") === "fragment";
   const body = secret && fragment
-    ? `<div style="flex:1; min-height:0; display:grid; grid-template-rows:repeat(2,minmax(0,1fr)); background:#fff; color:#111; box-sizing:border-box;"><div style="padding:10px; font-size:16px; line-height:1.5; overflow-wrap:anywhere; box-sizing:border-box;">${escapeHtml(data.body)}</div><div style="border-top:1px solid #111; background:#c5c5c5; min-height:0; box-sizing:border-box;">${fragmentInfoHtml(data)}</div></div>`
-    : `<div style="flex:1; min-height:0; overflow:hidden; background:#fff; color:#111; padding:10px; box-sizing:border-box; font-size:16px; line-height:1.5; overflow-wrap:anywhere;">${escapeHtml(data.body)}</div>`;
-  return `<div style="width:300px; height:420px; box-sizing:border-box; ${secret ? "" : "border:1px solid #111;"} padding:10px; background:${background}; color:${foreground}; font-family:Arial, 'Noto Sans KR', sans-serif;"><div style="width:100%; height:100%; border:2px solid ${foreground}; padding:3px; box-sizing:border-box;"><div style="width:100%; height:100%; border:1px solid ${foreground}; display:flex; flex-direction:column; box-sizing:border-box;"><div style="height:32px; flex-shrink:0; ${secret ? "" : "border-bottom:1px solid #111;"} box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:20px; line-height:1.2; font-weight:500;">${secret ? '비밀' : '개요'}</div>${nameRow}${body}</div></div></div>`;
+    ? `<div style="flex:1; display:grid; grid-template-rows:repeat(2,minmax(min-content,1fr)); background:#fff; color:#111; box-sizing:border-box;"><div style="padding:10px; font-size:16px; line-height:1.5; overflow-wrap:anywhere; box-sizing:border-box;">${escapeHtml(data.body)}</div><div style="border-top:1px solid #111; background:#c5c5c5; display:flex; flex-direction:column; box-sizing:border-box;">${fragmentInfoHtml(data)}</div></div>`
+    : `<div style="flex:1; background:#fff; color:#111; padding:10px; box-sizing:border-box; font-size:16px; line-height:1.5; overflow-wrap:anywhere;">${escapeHtml(data.body)}</div>`;
+  return `<div style="width:300px; min-height:420px; display:flex; flex-direction:column; box-sizing:border-box; ${secret ? "" : "border:1px solid #111;"} padding:10px; background:${background}; color:${foreground}; font-family:Arial, 'Noto Sans KR', sans-serif;"><div style="width:100%; flex:1; display:flex; flex-direction:column; border:2px solid ${foreground}; padding:3px; box-sizing:border-box;"><div style="width:100%; flex:1; border:1px solid ${foreground}; display:flex; flex-direction:column; box-sizing:border-box;"><div style="height:32px; flex-shrink:0; ${secret ? "" : "border-bottom:1px solid #111;"} box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:20px; line-height:1.2; font-weight:500;">${secret ? '비밀' : '개요'}</div>${nameRow}${body}</div></div></div>`;
 }
 
 function stratoHtml(type, data) {
   const v = data.strato;
-  const cell = (text, height = "28px", padding = "5px 8px") => `<div style="background:#fff; color:#111; padding:${padding}; height:${height}; min-height:0; overflow:hidden; font-size:16px; line-height:1.3; box-sizing:border-box; overflow-wrap:anywhere;">${escapeHtml(text)}</div>`;
+  const cell = (text, height = "28px", padding = "5px 8px") => `<div style="background:#fff; color:#111; padding:${padding}; min-height:${height}; font-size:16px; line-height:1.3; box-sizing:border-box; overflow-wrap:anywhere;">${escapeHtml(text)}</div>`;
   const frontCell = (text) => `<div style="height:36px; flex-shrink:0; background:#fff; color:#111; padding:0 8px; display:flex; align-items:center; overflow:hidden; font-size:16px; line-height:1.3; box-sizing:border-box;">${escapeHtml(text)}</div>`;
   const heading = (text) => `<div style="background:#111; color:#fff; text-align:center; font-size:14px; line-height:1.5; font-weight:bold;">${text}</div>`;
   if (type === "public") return `<div style="width:300px; height:420px; background:#000; color:#fff; padding:10px; box-sizing:border-box; font-family:Arial, 'Noto Sans KR', sans-serif;"><div style="height:100%; border:2px solid #fff; padding:8px; box-sizing:border-box; display:flex; flex-direction:column;"><div style="text-align:center; font-size:24px; line-height:1.2; font-weight:500; margin-bottom:16px;">굴레</div><div style="font-size:14px; margin-bottom:4px;">넘버</div><div style="display:grid; grid-template-columns:48px minmax(0,1fr); gap:6px; flex-shrink:0;">${frontCell(v.number)}${frontCell(v.name)}</div><div style="font-size:14px; margin:10px 0 4px;">지정특기</div>${frontCell(v.skill)}<div style="margin-top:4px; flex-shrink:0;">${frontCell(v.skillExtra)}</div><div style="flex:1; display:flex; align-items:center; justify-content:center; text-align:center; font-size:14px; line-height:1.6;">이 카드의<br>뒷면은 접근 판정이<br>성공하면 공개된다.</div><div style="flex-shrink:0; text-align:center; font-size:28px; line-height:1.2; font-weight:700; white-space:nowrap;">STRATo SHoUT</div></div></div>`;
-  return `<div style="width:300px; height:420px; border:1px solid #111; background:#fff; color:#111; padding:10px; box-sizing:border-box; font-family:Arial, 'Noto Sans KR', sans-serif;"><div style="height:100%; border:2px solid #111; padding:8px; box-sizing:border-box; display:flex; flex-direction:column; gap:8px;"><div style="flex:1; min-height:0; overflow:hidden; padding:0 8px; box-sizing:border-box; font-size:16px; line-height:1.5; overflow-wrap:anywhere;">${escapeHtml(data.body)}</div><div style="height:57px; flex-shrink:0;">${heading('정체')}${cell(v.identity, "36px")}</div><div style="display:grid; grid-template-columns:64px minmax(0,1fr); gap:8px; height:142px; flex-shrink:0;"><div style="border:1px solid #111; text-align:center;">${heading('지배력')}<div style="padding:5px; font-size:12px; line-height:1.5;">공개 시</div>${cell(v.publicPower, "28px", "0")}<div style="padding:5px; font-size:12px; line-height:1.5;">비공개 시</div>${cell(v.secretPower, "28px", "0")}</div><div>${heading('효과')}${cell(v.effect, "121px")}</div></div></div></div>`;
+  return `<div style="width:300px; min-height:420px; display:flex; flex-direction:column; border:1px solid #111; background:#fff; color:#111; padding:10px; box-sizing:border-box; font-family:Arial, 'Noto Sans KR', sans-serif;"><div style="flex:1; border:2px solid #111; padding:8px; box-sizing:border-box; display:flex; flex-direction:column; gap:8px;"><div style="flex:1; padding:0 8px; box-sizing:border-box; font-size:16px; line-height:1.5; overflow-wrap:anywhere;">${escapeHtml(data.body)}</div><div style="min-height:57px; flex-shrink:0;">${heading('정체')}${cell(v.identity, "36px")}</div><div style="display:grid; grid-template-columns:64px minmax(0,1fr); gap:8px; min-height:142px; flex-shrink:0;"><div style="border:1px solid #111; text-align:center;">${heading('지배력')}<div style="padding:5px; font-size:12px; line-height:1.5;">공개 시</div>${cell(v.publicPower, "28px", "0")}<div style="padding:5px; font-size:12px; line-height:1.5;">비공개 시</div>${cell(v.secretPower, "28px", "0")}</div><div>${heading('효과')}${cell(v.effect, "121px")}</div></div></div></div>`;
 }
 
 function lyricsHtml(data) {
@@ -231,6 +258,7 @@ function handoutHtml(type, data) {
 }
 
 function updatePreview() {
+  switchFormDraft();
   const type = getType();
   const shinobi = isShinobi();
   const magica = isMagica();
@@ -351,7 +379,7 @@ async function savePng() {
 
   const dataUrl = await window.htmlToImage.toPng(target, {
     cacheBust: true,
-    pixelRatio: Math.max(2, Math.ceil(window.devicePixelRatio || 1))
+    pixelRatio: 2
   });
 
   const link = document.createElement("a");
@@ -396,13 +424,14 @@ function constrainCardText() {
       element.style.overflow = "hidden";
     }
     if (element.style.width === "53px" || element.style.width === "60px") element.style.flexShrink = "0";
-    if (element.style.height === "262px" || element.style.height === "264px") element.style.overflow = "hidden";
   });
 }
 
 // Initialize generated fields before registering their input events.
 buildRitualInputs();
-document.querySelectorAll('.editor-panel input[type="text"], .editor-panel textarea').forEach(registerTextField);
+textFields = Array.from(document.querySelectorAll('.editor-panel input[type="text"], .editor-panel textarea'));
+defaultTextValues = textFields.map(field => field.value);
+textFields.forEach(registerTextField);
 document.querySelectorAll('.editor-panel input[type="radio"]').forEach(radio => radio.addEventListener("change", updatePreview));
 fields.symbolButtons.forEach((button) => {
   button.addEventListener("click", () => insertSymbol(button.dataset.insert));
