@@ -229,6 +229,13 @@ button:hover  {
   max-width: 848px;
 }
 
+.update-notice  {
+  margin: -16px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .rule-button  {
   aspect-ratio: 1 / 1;
   border: 1px solid #111;
